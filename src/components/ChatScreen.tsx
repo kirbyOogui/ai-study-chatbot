@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { Message, ChatSession } from '@/types';
 import { MODE_CONFIG, LEVEL_CONFIG } from '@/constants';
+import { getQuizStats } from '@/lib/storage';
 
 interface ChatScreenProps {
   session: ChatSession;
@@ -104,6 +105,7 @@ export default function ChatScreen({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const modeConfig = MODE_CONFIG[session.mode];
   const ModeIcon = modeConfig.icon;
+  const quizStats = session.mode === 'quiz' ? getQuizStats(session.topic) : null;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -150,6 +152,11 @@ export default function ChatScreen({
                 <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-medium">
                   {LEVEL_CONFIG[session.level].label}
                 </span>
+                {quizStats && quizStats.total > 0 && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-medium">
+                    正答率 {quizStats.correct}/{quizStats.total}（{Math.round((quizStats.correct / quizStats.total) * 100)}%）
+                  </span>
+                )}
               </div>
               <p className="text-xs text-slate-500 truncate max-w-[280px]">
                 #{session.topic}
