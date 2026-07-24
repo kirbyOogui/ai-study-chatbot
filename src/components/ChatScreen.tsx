@@ -9,6 +9,8 @@ import {
   Copy,
   Check,
 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Message, ChatSession } from '@/types';
 import { MODE_CONFIG, LEVEL_CONFIG } from '@/constants';
 import { getQuizStats } from '@/lib/storage';
@@ -44,12 +46,85 @@ function MessageBubble({ message }: { message: Message }) {
 
       {/* Bubble */}
       <div className={`relative max-w-[75%] ${isUser ? 'items-end' : 'items-start'} flex flex-col`}>
-        <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap break-words ${
+        <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed break-words ${
           isUser
-            ? 'bg-blue-600 text-white rounded-tr-sm'
+            ? 'bg-blue-600 text-white rounded-tr-sm whitespace-pre-wrap'
             : 'bg-white text-slate-800 rounded-tl-sm shadow-sm border border-slate-100'
         }`}>
-          {message.content}
+          {isUser ? (
+            message.content
+          ) : (
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                h1: ({ children }) => (
+                  <h1 className="text-base font-bold text-slate-900 mt-3 mb-1.5 first:mt-0">{children}</h1>
+                ),
+                h2: ({ children }) => (
+                  <h2 className="text-sm font-bold text-slate-900 mt-3 mb-1 first:mt-0">{children}</h2>
+                ),
+                h3: ({ children }) => (
+                  <h3 className="text-sm font-semibold text-slate-800 mt-2 mb-1 first:mt-0">{children}</h3>
+                ),
+                p: ({ children }) => (
+                  <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>
+                ),
+                ul: ({ children }) => (
+                  <ul className="mb-2 last:mb-0 space-y-0.5 pl-4 list-disc">{children}</ul>
+                ),
+                ol: ({ children }) => (
+                  <ol className="mb-2 last:mb-0 space-y-0.5 pl-4 list-decimal">{children}</ol>
+                ),
+                li: ({ children }) => (
+                  <li className="leading-relaxed">{children}</li>
+                ),
+                strong: ({ children }) => (
+                  <strong className="font-semibold text-slate-900">{children}</strong>
+                ),
+                em: ({ children }) => (
+                  <em className="italic">{children}</em>
+                ),
+                code: ({ className, children, ...props }) => {
+                  const isBlock = className?.startsWith('language-');
+                  if (isBlock) {
+                    return (
+                      <code className="block bg-slate-100 text-slate-800 rounded-lg px-3 py-2 my-2 text-xs font-mono overflow-x-auto whitespace-pre">
+                        {children}
+                      </code>
+                    );
+                  }
+                  return (
+                    <code className="bg-slate-100 text-slate-800 rounded px-1 py-0.5 text-xs font-mono" {...props}>
+                      {children}
+                    </code>
+                  );
+                },
+                pre: ({ children }) => (
+                  <pre className="my-2 overflow-x-auto rounded-lg bg-slate-100">{children}</pre>
+                ),
+                blockquote: ({ children }) => (
+                  <blockquote className="border-l-4 border-slate-300 pl-3 my-2 text-slate-600 italic">{children}</blockquote>
+                ),
+                table: ({ children }) => (
+                  <div className="overflow-x-auto my-2">
+                    <table className="w-full text-xs border-collapse">{children}</table>
+                  </div>
+                ),
+                thead: ({ children }) => (
+                  <thead className="bg-slate-100">{children}</thead>
+                ),
+                th: ({ children }) => (
+                  <th className="border border-slate-200 px-3 py-1.5 text-left font-semibold text-slate-700">{children}</th>
+                ),
+                td: ({ children }) => (
+                  <td className="border border-slate-200 px-3 py-1.5 text-slate-700">{children}</td>
+                ),
+                hr: () => <hr className="my-3 border-slate-200" />,
+              }}
+            >
+              {message.content}
+            </ReactMarkdown>
+          )}
         </div>
         <div className={`flex items-center gap-2 mt-1 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
           <span className="text-xs text-slate-400">
